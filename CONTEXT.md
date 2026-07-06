@@ -39,6 +39,7 @@ All SKUs priced in **EUR** and offer either **Pre-buy** or **Waiting list**.
 | D1 | Project seeded from `fabia_web` (marketing site) and `fabia-0.3` (orchestrator) | Reuse terminology, pipeline, and decision patterns. | What exactly does `fabiaweb_shop` build? |
 | D2 | `fabiaweb_shop` is a **hardware + subscription storefront** for FABIABox. Phase 1 is waitlist / pre-buy only. | Name and ecosystem context point to a shop; no third-party marketplace yet (that's a separate project); white-label checkout is interesting but not phase 1. | Which tiers/services are offered at launch? |
 | D3 | Launch catalog = **6 SKUs**, currency **EUR**. Every SKU offers either **pre-buy** (pay now) or **waiting list** (no payment). | Confirmed by user. Pre-buy = priority fulfillment; waitlist = expression of interest. | What is the pricing / deposit structure for each SKU? |
+| D4 | **No automated checkout in Phase 1.** Pre-buy and waitlist both use the same form; pre-buyers are invoiced manually afterwards. | Keeps the site static, avoids PCI/integration complexity, matches `fabia_web` lead-capture pattern. | What form fields are captured? Where is the data stored? How are notifications handled? |
 
 ---
 
@@ -50,10 +51,12 @@ All SKUs priced in **EUR** and offer either **Pre-buy** or **Waiting list**.
 
 ## Open Questions
 
-1. What is `fabiaweb_shop`? (marketplace, storefront, checkout, product catalog, subscription management, etc.)
-2. Who is the user? (end customer, investor, admin, agent)
-3. Does it integrate with the existing FABIABox pipeline, or is it a standalone surface?
-4. What is the deployment target? (same nginx/Flask stack as fabia_web, or new service)
+1. What form fields are captured for pre-buy / waitlist?
+2. Where is order data stored?
+3. How are pre-buy / waitlist submissions notified to the team?
+4. What is the pricing / deposit structure for each SKU?
+5. What is the deployment target? (same nginx/Flask stack as `fabia_web`, or new service)
+6. Does `fabiaweb_shop` integrate with the existing FABIABox pipeline, or is it a standalone surface?
 
 ---
 
