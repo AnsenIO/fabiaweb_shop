@@ -48,6 +48,7 @@ All SKUs priced in **EUR** and offer either **Pre-buy** or **Waiting list**.
 | D10 | **Hardware pre-buy reservation = €500** per unit. Displayed as "Pre-buy reservation: €500" (refundable / credited toward final invoice). | Confirmed by user. Filters serious buyers without being prohibitive. | What happens after form submission? Does the shop connect to the FABIABox pipeline or stay standalone? |
 | D11 | **Post-submission = simple thank-you page.** `fabiaweb_shop` is **standalone** in Phase 1; no automatic handoff to `fabia-0.3` pipeline. | Marketing site should not depend on an unfinished orchestrator. Manual follow-up from CSV. | What tech stack and deployment structure do we use? |
 | D12 | **Tech stack mirrors `fabia_web`:** static HTML, Flask loopback API, nginx reverse proxy, base64-over-SSH deploy, cron+Telegram notifications. | Proven, cheap, fast to iterate; keeps operational overhead identical. | Start implementation now or refine further? |
+| D13 | **Privacy policy links to `fabiabox.com/privacy.html`** (shared policy). | Same data controller (IABAI SaS), consistent GDPR narrative, no duplicate policy maintenance. | Should `fabiaweb_shop` link back to `fabiabox.com` research/investor pages? Start building now? |
 
 ---
 
