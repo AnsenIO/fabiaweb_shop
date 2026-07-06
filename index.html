@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FABIABox Shop — Sovereign AI Solutions</title>
+    <title>FABIABox Shop — Start Your AI Company Today</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,6 +19,9 @@
         .card-hover {
             transition: all 0.3s ease;
         }
+        .amber-glow {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
+        }
     </style>
 </head>
 <body class="gradient-bg text-white min-h-screen">
@@ -31,12 +34,12 @@
                     <span class="text-xl font-bold">FABIABox Shop</span>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="#products" class="hover:text-amber-400 transition">Products</a>
-                    <a href="#enterprise" class="hover:text-amber-400 transition">Enterprise</a>
+                    <a href="#pricing" class="hover:text-amber-400 transition">Pricing</a>
+                    <a href="#how-it-works" class="hover:text-amber-400 transition">How It Works</a>
                     <a href="#contact" class="hover:text-amber-400 transition">Contact</a>
                 </nav>
                 <a href="https://fabiabox.com" class="text-amber-400 hover:text-amber-300">
-                    <i class="fas fa-home mr-1"></i> Main Site
+                    <i class="fas fa-home mr-1"></i> Back to FABIABox
                 </a>
             </div>
         </div>
@@ -45,16 +48,19 @@
     <!-- Hero -->
     <section class="py-20">
         <div class="container mx-auto px-6 text-center">
+            <div class="inline-block bg-amber-500/20 text-amber-400 px-4 py-1 rounded-full text-sm font-semibold mb-6">
+                Start Your AI Company Today
+            </div>
             <h1 class="text-5xl md:text-6xl font-bold mb-6">
-                Sovereign AI <span class="text-amber-400">Solutions</span>
+                The AI Co-Founder<br>That Ships Your Company
             </h1>
             <p class="text-xl text-gray-300 max-w-3xl mx-auto mb-12">
-                Enterprise-grade AI workstations designed for non-technical founders. 
-                Keep your data, models, and governance under your control.
+                Fabia — your AI co-founder — builds, launches, and operates your company for you. 
+                No engineers needed. No hidden fees. Just describe your idea and let Fabia run it.
             </p>
             <div class="flex justify-center space-x-4">
-                <a href="#products" class="bg-amber-500 text-black px-8 py-3 rounded-lg font-semibold hover:bg-amber-400 transition">
-                    View Products
+                <a href="#pricing" class="bg-amber-500 text-black px-8 py-3 rounded-lg font-semibold hover:bg-amber-400 transition">
+                    View Plans
                 </a>
                 <a href="#contact" class="border border-white/30 px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition">
                     Request Demo
@@ -63,90 +69,103 @@
         </div>
     </section>
 
-    <!-- Products -->
-    <section id="products" class="py-16">
+    <!-- Pricing -->
+    <section id="pricing" class="py-16">
         <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-12">Our Products</h2>
+            <h2 class="text-3xl font-bold text-center mb-4">Choose Your Plan</h2>
+            <p class="text-gray-400 text-center mb-12">Start lean. Scale as you grow.</p>
             
-            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <!-- Product 1 -->
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Starter -->
                 <div class="bg-white/5 backdrop-blur rounded-2xl p-8 border border-white/10 card-hover">
                     <div class="w-14 h-14 bg-amber-500/20 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-server text-amber-400 text-2xl"></i>
+                        <i class="fas fa-rocket text-amber-400 text-2xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold mb-4">FABIABox Starter</h3>
+                    <h3 class="text-2xl font-bold mb-2">Starter</h3>
                     <p class="text-gray-400 mb-6">
-                        Perfect for startups. Includes AI workstation, domain-specific models, and basic support.
+                        Perfect for testing the waters. Get your AI company running with minimal investment.
                     </p>
-                    <div class="text-4xl font-bold text-amber-400 mb-2">€15,000</div>
-                    <p class="text-sm text-gray-500 mb-6">One-time license</p>
+                    <div class="text-4xl font-bold text-amber-400 mb-1">€49.99<span class="text-lg text-gray-400">/month</span></div>
+                    <p class="text-sm text-gray-500 mb-6">+ 20% commission on transactions</p>
                     <button onclick="selectProduct('starter')" class="w-full bg-amber-500 text-black py-3 rounded-lg font-semibold hover:bg-amber-400 transition">
-                        Buy Now
+                        Get Started
                     </button>
                 </div>
 
-                <!-- Product 2 -->
+                <!-- Enterprise -->
                 <div class="bg-white/5 backdrop-blur rounded-2xl p-8 border border-amber-500/30 card-hover relative">
                     <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-500 text-black px-4 py-1 rounded-full text-sm font-semibold">
-                        Most Popular
+                        Recommended
                     </div>
                     <div class="w-14 h-14 bg-amber-500/20 rounded-xl flex items-center justify-center mb-6">
                         <i class="fas fa-building text-amber-400 text-2xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold mb-4">FABIABox Enterprise</h3>
+                    <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
                     <p class="text-gray-400 mb-6">
-                        For established companies. Full suite with custom models, priority support, and training.
+                        For serious founders ready to scale. Full access to all agents, priority support, and custom models.
                     </p>
-                    <div class="text-4xl font-bold text-amber-400 mb-2">€45,000</div>
-                    <p class="text-sm text-gray-500 mb-6">One-time license</p>
+                    <div class="text-4xl font-bold text-amber-400 mb-1">€499<span class="text-lg text-gray-400">/month</span></div>
+                    <p class="text-sm text-gray-500 mb-6">+ 15% commission on transactions</p>
                     <button onclick="selectProduct('enterprise')" class="w-full bg-amber-500 text-black py-3 rounded-lg font-semibold hover:bg-amber-400 transition">
-                        Buy Now
-                    </button>
-                </div>
-
-                <!-- Product 3 -->
-                <div class="bg-white/5 backdrop-blur rounded-2xl p-8 border border-white/10 card-hover">
-                    <div class="w-14 h-14 bg-amber-500/20 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-users text-amber-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4">FABIABox Team</h3>
-                    <p class="text-gray-400 mb-6">
-                        Multi-user deployment with shared models, team governance, and collaborative features.
-                    </p>
-                    <div class="text-4xl font-bold text-amber-400 mb-2">€28,000</div>
-                    <p class="text-sm text-gray-500 mb-6">Up to 10 users</p>
-                    <button onclick="selectProduct('team')" class="w-full bg-amber-500 text-black py-3 rounded-lg font-semibold hover:bg-amber-400 transition">
-                        Buy Now
+                        Go Enterprise
                     </button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features -->
-    <section class="py-16 bg-black/20">
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-16 bg-black/20">
         <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-12">What's Included</h2>
-            <div class="grid md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">How FABIABox Works</h2>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 <div class="text-center">
-                    <i class="fas fa-shield-alt text-4xl text-amber-400 mb-4"></i>
-                    <h4 class="font-semibold mb-2">Sovereign Data</h4>
-                    <p class="text-gray-400 text-sm">Your data never leaves your infrastructure</p>
+                    <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-amber-400">1</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">Describe Your Idea</h4>
+                    <p class="text-gray-400 text-sm">Chat via Telegram, WhatsApp, Email, or the local web page. Attach documents, notes, or raw sketches.</p>
                 </div>
                 <div class="text-center">
-                    <i class="fas fa-brain text-4xl text-amber-400 mb-4"></i>
-                    <h4 class="font-semibold mb-2">Domain Models</h4>
-                    <p class="text-gray-400 text-sm">Fine-tuned for your specific industry</p>
+                    <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-amber-400">2</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">Review the Plan</h4>
+                    <p class="text-gray-400 text-sm">A complete business plan is presented for your approval. Edit, reject, or green-light — you stay in control.</p>
                 </div>
                 <div class="text-center">
-                    <i class="fas fa-cogs text-4xl text-amber-400 mb-4"></i>
-                    <h4 class="font-semibold mb-2">Self-Improving</h4>
-                    <p class="text-gray-400 text-sm">Continuous optimization without intervention</p>
+                    <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-amber-400">3</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">Build & Operate</h4>
+                    <p class="text-gray-400 text-sm">Coder, QA, Security, and Marketing agents build and run your company autonomously. You approve, Fabia executes.</p>
                 </div>
-                <div class="text-center">
-                    <i class="fas fa-headset text-4xl text-amber-400 mb-4"></i>
-                    <h4 class="font-semibold mb-2">Priority Support</h4>
-                    <p class="text-gray-400 text-sm">24/7 dedicated technical assistance</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Sovereign AI -->
+    <section class="py-16">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <h2 class="text-3xl font-bold text-center mb-12">Why Sovereign AI?</h2>
+            <div class="space-y-6">
+                <div class="flex items-start space-x-4 bg-white/5 backdrop-blur rounded-xl p-6 border border-white/10">
+                    <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-times text-red-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-1">Cloud AI Is a Liability</h4>
+                        <p class="text-gray-400 text-sm">A single hallucinated tool call can leak data, breach GDPR, or generate surprise bills — exactly what the EU AI Act will penalize.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4 bg-white/5 backdrop-blur rounded-xl p-6 border border-white/10">
+                    <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check text-green-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-1">Your Data Never Leaves Your Infrastructure</h4>
+                        <p class="text-gray-400 text-sm">FABIABox runs locally. Your data, your models, your governance. Fully compliant by design.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -157,7 +176,7 @@
         <div class="container mx-auto px-6 max-w-2xl">
             <h2 class="text-3xl font-bold text-center mb-4">Get in Touch</h2>
             <p class="text-gray-400 text-center mb-12">
-                Fill out the form below and we'll send you the pitch deck and technical details
+                Ready to start? Fill out the form and we'll get you set up.
             </p>
             
             <form id="shopForm" class="bg-white/5 backdrop-blur rounded-2xl p-8 border border-white/10" onsubmit="handleSubmit(event)">
@@ -224,9 +243,8 @@
             
             const messageField = document.getElementById('message');
             const messages = {
-                'starter': 'I am interested in the FABIABox Starter package (€15,000)',
-                'enterprise': 'I am interested in the FABIABox Enterprise package (€45,000)',
-                'team': 'I am interested in the FABIABox Team package (€28,000)'
+                'starter': 'I am interested in the Starter plan (€49.99/month + 20% commission)',
+                'enterprise': 'I am interested in the Enterprise plan (€499/month + 15% commission)'
             };
             messageField.value = messages[product] || '';
         }
