@@ -45,6 +45,7 @@ All SKUs priced in **EUR** and offer either **Pre-buy** or **Waiting list**.
 | D7 | Order notifications use **cron + CSV sync + Telegram**, same pattern as `fabia_web` lead notifications. | Offline, reliable, no real-time integration complexity in Phase 1. | What is the pricing/deposit structure for each SKU? |
 | D8 | **Pricing display:** services show a monthly EUR fee; hardware shows "Price on request" (placeholders for Phase 1). | Services are easier to price upfront; hardware costs fluctuate. | What are the placeholder monthly prices for Build/Operate plans? Should hardware show a pre-buy deposit amount or just "Price on request"? |
 | D9 | **Service pricing:** Build Plan = **€49.99/month**, Operate Plan = **€49.99/month**, annual plan = **€499**. Hardware shows a **pre-buy reservation**. | Confirmed by user. Annual plan is roughly 2 months free vs monthly. | What is the hardware pre-buy reservation amount? Should it be a fixed deposit or "Contact us"? |
+| D10 | **Hardware pre-buy reservation = €500** per unit. Displayed as "Pre-buy reservation: €500" (refundable / credited toward final invoice). | Confirmed by user. Filters serious buyers without being prohibitive. | What happens after form submission? Does the shop connect to the FABIABox pipeline or stay standalone? |
 
 ---
 
