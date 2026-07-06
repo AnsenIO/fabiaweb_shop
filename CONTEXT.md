@@ -41,6 +41,7 @@ All SKUs priced in **EUR** and offer either **Pre-buy** or **Waiting list**.
 | D3 | Launch catalog = **6 SKUs**, currency **EUR**. Every SKU offers either **pre-buy** (pay now) or **waiting list** (no payment). | Confirmed by user. Pre-buy = priority fulfillment; waitlist = expression of interest. | What is the pricing / deposit structure for each SKU? |
 | D4 | **No automated checkout in Phase 1.** Pre-buy and waitlist both use the same form; pre-buyers are invoiced manually afterwards. | Keeps the site static, avoids PCI/integration complexity, matches `fabia_web` lead-capture pattern. | What form fields are captured? Where is the data stored? How are notifications handled? |
 | D5 | Order form captures: **name, email, company, country, SKU, quantity, action (pre-buy/waitlist), message**; stored in `data/orders.csv` with `status` column. | Confirmed by user. GDPR consent checkbox + privacy policy link required (24-month retention). | Where is the site deployed? How are submissions notified? |
+| D6 | Deploy at **`shop.fabiabox.com`** on the same droplet as `fabiabox.com`, but as a **separate repo/project** with its own `deploy.sh` and `data/orders.csv`. | Clean separation while sharing operational overhead; matches user preference for different repo. | How are order submissions notified? What is the pricing/deposit structure? |
 
 ---
 
