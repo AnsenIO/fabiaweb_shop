@@ -43,6 +43,7 @@ All SKUs priced in **EUR** and offer either **Pre-buy** or **Waiting list**.
 | D5 | Order form captures: **name, email, company, country, SKU, quantity, action (pre-buy/waitlist), message**; stored in `data/orders.csv` with `status` column. | Confirmed by user. GDPR consent checkbox + privacy policy link required (24-month retention). | Where is the site deployed? How are submissions notified? |
 | D6 | Deploy at **`shop.fabiabox.com`** on the same droplet as `fabiabox.com`, but as a **separate repo/project** with its own `deploy.sh` and `data/orders.csv`. | Clean separation while sharing operational overhead; matches user preference for different repo. | How are order submissions notified? What is the pricing/deposit structure? |
 | D7 | Order notifications use **cron + CSV sync + Telegram**, same pattern as `fabia_web` lead notifications. | Offline, reliable, no real-time integration complexity in Phase 1. | What is the pricing/deposit structure for each SKU? |
+| D8 | **Pricing display:** services show a monthly EUR fee; hardware shows "Price on request" (placeholders for Phase 1). | Services are easier to price upfront; hardware costs fluctuate. | What are the placeholder monthly prices for Build/Operate plans? Should hardware show a pre-buy deposit amount or just "Price on request"? |
 
 ---
 
