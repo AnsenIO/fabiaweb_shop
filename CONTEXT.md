@@ -47,23 +47,32 @@ All SKUs priced in **EUR** and offer either **Pre-buy** or **Waiting list**.
 | D9 | **Service pricing:** Build Plan = **€49.99/month**, Operate Plan = **€49.99/month**, annual plan = **€499**. Hardware shows a **pre-buy reservation**. | Confirmed by user. Annual plan is roughly 2 months free vs monthly. | What is the hardware pre-buy reservation amount? Should it be a fixed deposit or "Contact us"? |
 | D10 | **Hardware pre-buy reservation = €500** per unit. Displayed as "Pre-buy reservation: €500" (refundable / credited toward final invoice). | Confirmed by user. Filters serious buyers without being prohibitive. | What happens after form submission? Does the shop connect to the FABIABox pipeline or stay standalone? |
 | D11 | **Post-submission = simple thank-you page.** `fabiaweb_shop` is **standalone** in Phase 1; no automatic handoff to `fabia-0.3` pipeline. | Marketing site should not depend on an unfinished orchestrator. Manual follow-up from CSV. | What tech stack and deployment structure do we use? |
+| D12 | **Tech stack mirrors `fabia_web`:** static HTML, Flask loopback API, nginx reverse proxy, base64-over-SSH deploy, cron+Telegram notifications. | Proven, cheap, fast to iterate; keeps operational overhead identical. | Start implementation now or refine further? |
 
 ---
 
 ## Pipeline Flow
 
-*TBD — depends on what `fabiaweb_shop` becomes.*
+```
+Visitor → shop.fabiabox.com → nginx
+                            ├── static files (index.html, PDF, PNG, privacy.html)
+                            └── /submit → Flask → append to data/orders.csv
 
----
+Developer → local edit → git commit → ./deploy.sh
+                                          ├── check/pull origin/main
+                                          ├── transfer whitelisted files
+                                          ├── update nginx config if changed
+                                          ├── reload gunicorn
+                                          └── pull orders.csv locally
+
+Cron → fetch-orders.sh → sync orders.csv → Telegram notification for new entries
+```
 
 ## Open Questions
 
-1. What form fields are captured for pre-buy / waitlist?
-2. Where is order data stored?
-3. How are pre-buy / waitlist submissions notified to the team?
-4. What is the pricing / deposit structure for each SKU?
-5. What is the deployment target? (same nginx/Flask stack as `fabia_web`, or new service)
-6. Does `fabiaweb_shop` integrate with the existing FABIABox pipeline, or is it a standalone surface?
+1. Start implementation now, or refine design further?
+2. Should the site include a privacy policy specific to `shop.fabiabox.com` or reuse `fabiabox.com/privacy.html`?
+3. Should `fabiaweb_shop` link back to `fabiabox.com` research/investor pages?
 
 ---
 
