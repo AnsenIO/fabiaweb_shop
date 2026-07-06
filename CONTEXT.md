@@ -24,6 +24,7 @@
 | ID | Decision | Rationale | Open Questions |
 |----|----------|-----------|----------------|
 | D1 | Project seeded from `fabia_web` (marketing site) and `fabia-0.3` (orchestrator) | Reuse terminology, pipeline, and decision patterns. | What exactly does `fabiaweb_shop` build? |
+| D2 | `fabiaweb_shop` is a **hardware + subscription storefront** for FABIABox. Phase 1 is waitlist / pre-buy only. | Name and ecosystem context point to a shop; no third-party marketplace yet (that's a separate project); white-label checkout is interesting but not phase 1. | Which tiers/services are offered at launch? What is the difference between "pre-buy" and "waiting list"? |
 
 ---
 
