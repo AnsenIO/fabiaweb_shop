@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # deploy.sh — CI script for fabiaweb_shop
-# Checks for git updates, pulls, deploys to DO droplet, and syncs orders locally.
+# Checks for git updates, backs up preorders, pulls, deploys to DO droplet, and syncs locally.
 #
 # Usage:
-#   ./deploy.sh              # Full deploy + order sync
+#   ./deploy.sh              # Full deploy + preorder backup + sync
 #   ./deploy.sh --check      # Only check if updates are available
-#   ./deploy.sh --orders     # Only pull orders from droplet
-#   ./deploy.sh --deploy     # Skip git pull, just deploy current state
+#   ./deploy.sh --backup     # Only backup preorders from droplet
+#   ./deploy.sh --deploy     # Skip git pull, just backup + deploy
+#   ./deploy.sh --sync       # Only pull preorders from droplet
 #
 # Config (via .env in the same directory):
 #   DROPLET_IP    — Droplet IP (default: 159.223.27.54)
@@ -87,20 +88,49 @@ pull_updates() {
     ok "Pull complete"
 }
 
+backup_preorders() {
+    log "Backing up preorders from droplet..."
+    
+    local remote_csv="${REMOTE_BASE}/data/contacts.csv"
+    local backup_dir="$SCRIPT_DIR/backups"
+    local timestamp
+    timestamp=$(date +%Y%m%d_%H%M%S)
+    local backup_file="$backup_dir/contacts_${timestamp}.csv"
+    
+    # Fetch contacts via SSH
+    local content
+    content=$(ssh_cmd "cat ${remote_csv} 2>/dev/null" || echo "")
+    
+    if [ -z "$content" ]; then
+        log "No preorders found on droplet"
+        return 0
+    fi
+    
+    # Create backup directory and save
+    mkdir -p "$backup_dir"
+    echo "$content" > "$backup_file"
+    local count
+    count=$(echo "$content" | tail -n +2 | wc -l)
+    ok "Backed up ${count} preorders to ${backup_file}"
+}
+
 deploy_to_droplet() {
     log "Deploying to droplet ${DROPLET_IP}..."
-
+    
+    # Create data dir on droplet
     ssh_cmd "mkdir -p ${REMOTE_BASE}/data" >/dev/null 2>&1
-
+    
+    # Transfer each file
     for file in "${DEPLOY_FILES[@]}"; do
         if [ -f "$file" ]; then
             transfer_file "$file" "${REMOTE_BASE}/${file}"
             ok "Deployed ${file}"
         fi
     done
-
+    
     # Ensure nginx config is up to date (only if it has certbot SSL blocks)
     if [ -f "nginx.conf" ]; then
+        # Safety check: refuse to deploy an HTTP-only config (would break SSL)
         if ! grep -q "managed by Certbot" "$SCRIPT_DIR/nginx.conf"; then
             log "⚠ Skipping nginx deploy — local config missing certbot SSL blocks"
             log "  (Would break HTTPS. Fix nginx.conf first.)"
@@ -121,11 +151,11 @@ deploy_to_droplet() {
             fi
         fi
     fi
-
+    
     # Restart gunicorn if server.py changed
     ssh_cmd "cd ${REMOTE_BASE} && .venv/bin/gunicorn --reload --bind '127.0.0.1:8081' --workers 2 --timeout 30 --daemon --pid /tmp/gunicorn_fabiashop.pid server:app" >/dev/null 2>&1 || true
     ok "Gunicorn restarted"
-
+    
     # Verify
     local health
     health=$(ssh_cmd "curl -s http://127.0.0.1:8081/health" 2>/dev/null || echo "failed")
@@ -137,32 +167,34 @@ deploy_to_droplet() {
     fi
 }
 
-sync_orders() {
-    log "Pulling orders from droplet..."
-
-    local remote_csv="${REMOTE_BASE}/data/orders.csv"
-    local local_csv="$SCRIPT_DIR/data/orders.csv"
-
+sync_preorders() {
+    log "Pulling preorders from droplet..."
+    
+    local remote_csv="${REMOTE_BASE}/data/contacts.csv"
+    local local_csv="$SCRIPT_DIR/data/contacts.csv"
+    
+    # Fetch contacts via SSH
     local content
     content=$(ssh_cmd "cat ${remote_csv} 2>/dev/null" || echo "")
-
+    
     if [ -z "$content" ]; then
-        log "No orders found on droplet"
+        log "No preorders found on droplet"
         return 0
     fi
-
+    
+    # Save locally
     mkdir -p "$SCRIPT_DIR/data"
     echo "$content" > "$local_csv"
     local count
     count=$(echo "$content" | tail -n +2 | wc -l)
-    ok "Saved ${count} orders to ${local_csv}"
+    ok "Saved ${count} preorders to ${local_csv}"
 }
 
 # ── Main ────────────────────────────────────────────────────────────────────────
 
 main() {
     local mode="${1:-full}"
-
+    
     case "$mode" in
         --check)
             git fetch origin >/dev/null 2>&1
@@ -174,14 +206,19 @@ main() {
                 log "Already up to date"
             fi
             ;;
-        --orders)
-            sync_orders
+        --backup)
+            backup_preorders
+            ;;
+        --sync)
+            sync_preorders
             ;;
         --deploy)
+            backup_preorders
             deploy_to_droplet
-            sync_orders
+            sync_preorders
             ;;
         *)
+            # Full mode: check, backup, pull, deploy, sync
             git fetch origin >/dev/null 2>&1
             local behind
             behind=$(git rev-list --count HEAD..origin/main 2>/dev/null || echo "0")
@@ -191,11 +228,12 @@ main() {
             else
                 log "Already up to date"
             fi
+            backup_preorders
             deploy_to_droplet
-            sync_orders
+            sync_preorders
             ;;
     esac
-
+    
     log "Done!"
 }
 
