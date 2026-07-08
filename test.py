@@ -29,8 +29,8 @@ class FabiaWebShopTests(unittest.TestCase):
         self.orders_csv = Path(self.temp_dir.name) / "orders.csv"
 
         # Meta Pixel must not hit the network during tests
-        self.meta_pixel_patch = patch("server.send_page_view_async")
-        self.mock_send_page_view = self.meta_pixel_patch.start()
+        self.meta_pixel_patch = patch("server.send_event_async")
+        self.mock_send_event = self.meta_pixel_patch.start()
 
     def tearDown(self):
         self.meta_pixel_patch.stop()
@@ -48,18 +48,17 @@ class FabiaWebShopTests(unittest.TestCase):
 
     def test_index_triggers_meta_pixel_page_view(self):
         self.client.get("/")
-        self.mock_send_page_view.assert_called_once()
-        call_kwargs = self.mock_send_page_view.call_args.kwargs
-        self.assertIn("url", call_kwargs)
-        self.assertIn("user_agent", call_kwargs)
-        self.assertIn("client_ip", call_kwargs)
+        self.mock_send_event.assert_called_once()
+        call_kwargs = self.mock_send_event.call_args.kwargs
+        self.assertEqual(call_kwargs["event_name"], "PageView")
+        self.assertEqual(call_kwargs["content_category"], "shop")
 
     def test_og_image_is_servable(self):
         self.assertIn("og-fabiashop.png", SERVABLE)
         response = self.client.get("/og-fabiashop.png")
         # 200 if file exists, 404 if missing in this checkout — both acceptable
         self.assertIn(response.status_code, (200, 404))
-        self.mock_send_page_view.assert_not_called()
+        self.mock_send_event.assert_not_called()
 
     def test_csv_is_not_servable(self):
         self.assertNotIn("orders.csv", SERVABLE)
@@ -78,7 +77,8 @@ class FabiaWebShopTests(unittest.TestCase):
         response = self.client.get("/some-product")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"FABIABox Shop", response.data)
-        self.mock_send_page_view.assert_called_once()
+        self.mock_send_event.assert_called_once()
+        self.assertEqual(self.mock_send_event.call_args.kwargs["event_name"], "PageView")
 
     # ── Health ──────────────────────────────────────────────────────────────
 
@@ -163,6 +163,34 @@ class FabiaWebShopTests(unittest.TestCase):
         self.assertIn("ada@example.com", rows[1])
         self.assertIn("pending", rows[1])
 
+    def test_submit_prebuy_triggers_initiate_checkout(self):
+        with self._patch_csv():
+            response = self.client.post(
+                "/submit",
+                json=self._valid_payload(action="pre-buy"),
+            )
+        self.assertEqual(response.status_code, 201)
+        calls = self.mock_send_event.call_args_list
+        event_names = [c.kwargs["event_name"] for c in calls]
+        self.assertIn("InitiateCheckout", event_names)
+        checkout_call = next(c for c in calls if c.kwargs["event_name"] == "InitiateCheckout")
+        self.assertEqual(checkout_call.kwargs["content_ids"], ["FABIABox Edge"])
+        self.assertEqual(checkout_call.kwargs["email"], "ada@example.com")
+
+    def test_submit_waitinglist_triggers_lead(self):
+        with self._patch_csv():
+            response = self.client.post(
+                "/submit",
+                json=self._valid_payload(action="waiting-list"),
+            )
+        self.assertEqual(response.status_code, 201)
+        calls = self.mock_send_event.call_args_list
+        event_names = [c.kwargs["event_name"] for c in calls]
+        self.assertIn("Lead", event_names)
+        lead_call = next(c for c in calls if c.kwargs["event_name"] == "Lead")
+        self.assertEqual(lead_call.kwargs["status"], "waiting-list")
+        self.assertEqual(lead_call.kwargs["content_ids"], ["FABIABox Edge"])
+
     def test_submit_form_encoded_success(self):
         with self._patch_csv():
             response = self.client.post(
@@ -189,7 +217,52 @@ class MetaPixelTests(unittest.TestCase):
     @patch("meta_pixel.requests.post")
     @patch("meta_pixel._executor")
     @patch.dict(os.environ, {"META_PIXEL_ID": "1234567890", "META_ACCESS_TOKEN": "test-token"})
-    def test_send_page_view_async_posts_to_facebook(self, mock_executor, mock_post):
+    def test_send_event_async_posts_to_facebook(self, mock_executor, mock_post):
+        from meta_pixel import send_event_async
+        from unittest.mock import MagicMock
+
+        request = MagicMock()
+        request.url = "https://shop.fabiabox.com/"
+        request.headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://fabiabox.com/"}
+        request.remote_addr = "203.0.113.1"
+        request.cookies = {"_fbp": "fbp-token", "_fbc": "fbc-token"}
+
+        send_event_async(
+            event_name="InitiateCheckout",
+            request=request,
+            email="ada@example.com",
+            first_name="Ada",
+            last_name="Lovelace",
+            country="France",
+            content_name="FABIABox Edge",
+            content_category="fabiabox_hardware",
+            content_ids=["FABIABox Edge"],
+            content_type="product",
+            num_items=2,
+        )
+
+        self.assertTrue(mock_executor.submit.called)
+
+    @patch("meta_pixel._executor")
+    def test_send_event_async_skips_without_credentials(self, mock_executor):
+        from meta_pixel import send_event_async
+        from unittest.mock import MagicMock
+
+        request = MagicMock()
+        request.url = "https://shop.fabiabox.com/"
+        request.headers = {}
+        request.remote_addr = "203.0.113.1"
+        request.cookies = {}
+
+        with patch.dict(os.environ, {"META_PIXEL_ID": "", "META_ACCESS_TOKEN": ""}, clear=False):
+            send_event_async(event_name="PageView", request=request)
+
+        mock_executor.submit.assert_not_called()
+
+    @patch("meta_pixel.requests.post")
+    @patch("meta_pixel._executor")
+    @patch.dict(os.environ, {"META_PIXEL_ID": "1234567890", "META_ACCESS_TOKEN": "test-token"})
+    def test_send_page_view_async_legacy_posts_to_facebook(self, mock_executor, mock_post):
         from meta_pixel import send_page_view_async
 
         send_page_view_async(
@@ -202,11 +275,10 @@ class MetaPixelTests(unittest.TestCase):
             email="ada@example.com",
         )
 
-        # Should submit the network call to the thread pool
         self.assertTrue(mock_executor.submit.called)
 
     @patch("meta_pixel._executor")
-    def test_send_page_view_async_skips_without_credentials(self, mock_executor):
+    def test_send_page_view_async_legacy_skips_without_credentials(self, mock_executor):
         from meta_pixel import send_page_view_async
 
         with patch.dict(os.environ, {"META_PIXEL_ID": "", "META_ACCESS_TOKEN": ""}, clear=False):

@@ -12,7 +12,7 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from meta_pixel import send_page_view_async
+from meta_pixel import send_event_async
 
 app = Flask(__name__, static_folder=None)
 
@@ -60,13 +60,11 @@ def _client_ip() -> str:
 
 def _emit_page_view() -> None:
     """Send async Meta Pixel PageView event before serving HTML."""
-    send_page_view_async(
-        url=request.url,
-        user_agent=request.headers.get("User-Agent", ""),
-        client_ip=_client_ip(),
-        fbp=request.cookies.get("_fbp"),
-        fbc=request.cookies.get("_fbc"),
-        referrer=request.headers.get("Referer"),
+    send_event_async(
+        event_name="PageView",
+        request=request,
+        content_name="FABIABox Shop",
+        content_category="shop",
     )
 
 
@@ -159,6 +157,37 @@ def submit_order():
             message,
             "pending",
         ])
+
+    # Fire a corresponding CAPI event for segmentation/optimization.
+    if action == "pre-buy":
+        send_event_async(
+            event_name="InitiateCheckout",
+            request=request,
+            email=email,
+            first_name=name.split()[0] if name.split() else None,
+            last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else None,
+            country=country,
+            content_name=sku,
+            content_category="fabiabox_hardware",
+            content_ids=[sku],
+            content_type="product",
+            num_items=quantity_int,
+        )
+    else:
+        send_event_async(
+            event_name="Lead",
+            request=request,
+            email=email,
+            first_name=name.split()[0] if name.split() else None,
+            last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else None,
+            country=country,
+            content_name=sku,
+            content_category="fabiabox_hardware",
+            content_ids=[sku],
+            content_type="product",
+            status="waiting-list",
+            custom_properties={"action": action, "quantity": quantity_int},
+        )
 
     print(f"[ORDER] {action} {quantity_int}x {sku} by {name} <{email}>")
     return jsonify(success=True), 201
