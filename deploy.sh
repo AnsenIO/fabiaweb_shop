@@ -34,6 +34,7 @@ REMOTE_BASE="/var/www/fabiaweb_shop"
 DEPLOY_FILES=(
     "index.html"
     "server.py"
+    "meta_pixel.py"
     "requirements.txt"
     "start.sh"
     "og-fabiashop.png"

@@ -1,4 +1,9 @@
-"""fabiaweb_shop web server — Flask, loopback-only, nginx reverse proxy."""
+"""fabiaweb_shop web server — Flask serves all traffic, nginx proxies everything.
+
+On every HTML page view, an async Meta Pixel PageView event is fired with
+forwarder headers (X-Forwarded-For, X-Forwarded-Proto, Referer, User-Agent,
+and _fbp/_fbc cookies). The event is fire-and-forget: page serving never blocks.
+"""
 
 import csv
 import os
@@ -7,13 +12,16 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from meta_pixel import send_page_view_async
+
 app = Flask(__name__, static_folder=None)
 
 BASE = Path(__file__).resolve().parent
 DATA_DIR = BASE / "data"
 ORDERS_CSV = DATA_DIR / "orders.csv"
 
-# Files nginx should serve directly from the app
+# Files that Flask is allowed to serve directly. Everything else is proxied
+# through the catch-all route, but nginx blocks sensitive extensions first.
 SERVABLE = {
     "index.html",
     "og-fabiashop.png",
@@ -31,7 +39,7 @@ VALID_SKUS = {
 VALID_ACTIONS = {"pre-buy", "waiting-list"}
 
 
-def _ensure_csv():
+def _ensure_csv() -> None:
     """Create orders.csv with headers if it doesn't exist."""
     DATA_DIR.mkdir(exist_ok=True)
     if not ORDERS_CSV.exists():
@@ -42,17 +50,62 @@ def _ensure_csv():
             ])
 
 
+def _client_ip() -> str:
+    """Recover the client IP from nginx forwarder headers."""
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.remote_addr or ""
+
+
+def _emit_page_view() -> None:
+    """Send async Meta Pixel PageView event before serving HTML."""
+    send_page_view_async(
+        url=request.url,
+        user_agent=request.headers.get("User-Agent", ""),
+        client_ip=_client_ip(),
+        fbp=request.cookies.get("_fbp"),
+        fbc=request.cookies.get("_fbc"),
+        referrer=request.headers.get("Referer"),
+    )
+
+
+def _send_file(filename: str):
+    """Read a whitelisted file and return a closed-body response."""
+    path = BASE / filename
+    with path.open("rb") as fh:
+        data = fh.read()
+    from flask import make_response
+    response = make_response(data)
+    # Best-effort MIME type
+    if filename.endswith(".html"):
+        response.headers["Content-Type"] = "text/html; charset=utf-8"
+    elif filename.endswith(".png"):
+        response.headers["Content-Type"] = "image/png"
+    return response
+
+
 @app.route("/")
-def index():
-    return send_from_directory(str(BASE), "index.html")
-
-
 @app.route("/<path:filename>")
-def static_file(filename):
-    """Only serve explicitly allowed files — nothing else leaks."""
-    if filename not in SERVABLE:
-        return jsonify(error="not found"), 404
-    return send_from_directory(str(BASE), filename)
+def catch_all(filename: str = "index.html"):
+    """Serve the SPA index page or whitelisted static assets.
+
+    Any path without a file extension falls back to index.html so the
+    single-page shop handles its own routing in the browser. Paths that
+    look like files but are not explicitly whitelisted return 404 so we
+    never leak source data or config even if nginx regex blocks are absent.
+    """
+    if filename in SERVABLE:
+        if filename == "index.html":
+            _emit_page_view()
+        return _send_file(filename)
+
+    # SPA route — serve index.html and fire the PageView event.
+    if "." not in filename:
+        _emit_page_view()
+        return _send_file("index.html")
+
+    return jsonify(error="not found"), 404
 
 
 @app.route("/submit", methods=["POST"])
