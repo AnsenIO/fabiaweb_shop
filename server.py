@@ -6,17 +6,20 @@ and _fbp/_fbc cookies). The event is fire-and-forget: page serving never blocks.
 """
 
 import csv
+import hashlib
 import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from matomo_tracker import track_event, track_page_view
 from meta_pixel import send_event_async
 
 app = Flask(__name__, static_folder=None)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=0, x_proto=1, x_host=1, x_prefix=0)
 
 BASE = Path(__file__).resolve().parent
 DATA_DIR = BASE / "data"
@@ -70,6 +73,22 @@ def _client_ip() -> str:
     if xff:
         return xff.split(",")[0].strip()
     return request.remote_addr or ""
+
+
+def _uid_from_email(email: str) -> str:
+    """Stable pseudonymised Matomo user ID."""
+    return hashlib.sha256(email.encode("utf-8")).hexdigest()
+
+
+def _track_form_error(error: str, action_name: str = "FABIABox Shop") -> None:
+    """Track a form validation error so drop-off points are visible in Matomo."""
+    track_event(
+        request,
+        category="form",
+        action="validation-error",
+        name=error,
+        action_name=action_name,
+    )
 
 
 def _emit_page_view() -> None:
@@ -139,18 +158,23 @@ def submit_order():
     consent_ok = consent is True or (isinstance(consent, str) and consent.lower() in ("on", "true", "yes", "1"))
 
     if not name or "@" not in email:
+        _track_form_error("missing-name-or-email")
         return jsonify(success=False, error="Name and valid email required"), 400
 
     if not country:
+        _track_form_error("missing-country")
         return jsonify(success=False, error="Country required"), 400
 
     if not consent_ok:
+        _track_form_error("missing-consent")
         return jsonify(success=False, error="Consent required"), 400
 
     if sku not in VALID_SKUS:
+        _track_form_error("invalid-product")
         return jsonify(success=False, error="Invalid product"), 400
 
     if action not in VALID_ACTIONS:
+        _track_form_error("invalid-action")
         return jsonify(success=False, error="Invalid action"), 400
 
     try:
@@ -158,6 +182,7 @@ def submit_order():
         if quantity_int < 1:
             raise ValueError
     except (ValueError, TypeError):
+        _track_form_error("invalid-quantity")
         return jsonify(success=False, error="Quantity must be a positive integer"), 400
 
     _ensure_csv()
@@ -174,6 +199,10 @@ def submit_order():
             message,
             "pending",
         ])
+
+    print(f"[ORDER] {action} {quantity_int}x {sku} by {name} <{email}>")
+
+    uid = _uid_from_email(email)
 
     # Fire a corresponding CAPI event for segmentation/optimization.
     if action == "pre-buy":
@@ -197,6 +226,7 @@ def submit_order():
             name=sku,
             value=float(quantity_int),
             action_name="FABIABox Shop",
+            uid=uid,
         )
     else:
         send_event_async(
@@ -220,9 +250,9 @@ def submit_order():
             name=sku,
             value=float(quantity_int),
             action_name="FABIABox Shop",
+            uid=uid,
         )
 
-    print(f"[ORDER] {action} {quantity_int}x {sku} by {name} <{email}>")
     return jsonify(success=True), 201
 
 

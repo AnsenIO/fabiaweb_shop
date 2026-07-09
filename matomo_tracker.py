@@ -18,12 +18,18 @@ import os
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Optional
 from urllib.parse import urlencode, urljoin
 
 import requests
 
 _executor = ThreadPoolExecutor(max_workers=2)
+
+
+def _hashed_uid(email: str) -> str:
+    """Return a stable, pseudonymised user ID from an email address."""
+    return hashlib.sha256(email.lower().strip().encode("utf-8")).hexdigest()
 
 
 def _tracker_url() -> Optional[str]:
@@ -72,7 +78,7 @@ def _visitor_id(request) -> str:
     return digest[:16]
 
 
-def _base_params(request, url: Optional[str] = None) -> dict:
+def _base_params(request, url: Optional[str] = None, uid: Optional[str] = None) -> dict:
     """Build the common query parameters for every Matomo hit."""
     params = {
         "idsite": _site_id(),
@@ -84,6 +90,9 @@ def _base_params(request, url: Optional[str] = None) -> dict:
         "url": url or request.url,
         "ua": request.headers.get("User-Agent", ""),
     }
+
+    if uid:
+        params["uid"] = uid
 
     referrer = request.headers.get("Referer") or request.headers.get("Referrer")
     if referrer:
@@ -101,13 +110,14 @@ def track_page_view(
     request,
     action_name: Optional[str] = None,
     url: Optional[str] = None,
+    uid: Optional[str] = None,
 ) -> None:
     """Fire an async Matomo PageView hit. Does nothing if MATOMO_URL is unset."""
     endpoint = _tracker_url()
     if not endpoint:
         return
 
-    params = _base_params(request, url=url)
+    params = _base_params(request, url=url, uid=uid)
     if action_name:
         params["action_name"] = action_name
 
@@ -122,13 +132,14 @@ def track_event(
     value: Optional[float] = None,
     url: Optional[str] = None,
     action_name: Optional[str] = None,
+    uid: Optional[str] = None,
 ) -> None:
     """Fire an async Matomo event hit."""
     endpoint = _tracker_url()
     if not endpoint:
         return
 
-    params = _base_params(request, url=url)
+    params = _base_params(request, url=url, uid=uid)
     params["e_c"] = category
     params["e_a"] = action
     if name:
@@ -139,6 +150,24 @@ def track_event(
         params["action_name"] = action_name
 
     _executor.submit(_send_hit, endpoint, params)
+
+
+def track_download(
+    request,
+    filename: str,
+    url: Optional[str] = None,
+    uid: Optional[str] = None,
+) -> None:
+    """Fire an async Matomo event for a file download."""
+    suffix = Path(filename).suffix.lstrip(".").lower() or "file"
+    track_event(
+        request,
+        category="download",
+        action=suffix,
+        name=filename,
+        url=url,
+        uid=uid,
+    )
 
 
 def _send_hit(endpoint: str, params: dict) -> None:
