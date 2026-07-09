@@ -82,6 +82,8 @@ def _uid_from_email(email: str) -> str:
 
 def _track_form_error(error: str, action_name: str = "FABIABox Shop") -> None:
     """Track a form validation error so drop-off points are visible in Matomo."""
+    if app.testing:
+        return
     track_event(
         request,
         category="form",
@@ -99,6 +101,8 @@ def _emit_page_view() -> None:
         content_name="FABIABox Shop",
         content_category="shop",
     )
+    if app.testing:
+        return
     track_page_view(request, action_name="FABIABox Shop")
 
 
@@ -204,54 +208,55 @@ def submit_order():
 
     uid = _uid_from_email(email)
 
-    # Fire a corresponding CAPI event for segmentation/optimization.
-    if action == "pre-buy":
-        send_event_async(
-            event_name="InitiateCheckout",
-            request=request,
-            email=email,
-            first_name=name.split()[0] if name.split() else None,
-            last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else None,
-            country=country,
-            content_name=sku,
-            content_category="fabiabox_hardware",
-            content_ids=[sku],
-            content_type="product",
-            num_items=quantity_int,
-        )
-        track_event(
-            request,
-            category="conversion",
-            action="initiate-checkout",
-            name=sku,
-            value=float(quantity_int),
-            action_name="FABIABox Shop",
-            uid=uid,
-        )
-    else:
-        send_event_async(
-            event_name="Lead",
-            request=request,
-            email=email,
-            first_name=name.split()[0] if name.split() else None,
-            last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else None,
-            country=country,
-            content_name=sku,
-            content_category="fabiabox_hardware",
-            content_ids=[sku],
-            content_type="product",
-            status="waiting-list",
-            custom_properties={"action": action, "quantity": quantity_int},
-        )
-        track_event(
-            request,
-            category="conversion",
-            action="lead",
-            name=sku,
-            value=float(quantity_int),
-            action_name="FABIABox Shop",
-            uid=uid,
-        )
+    if not app.testing:
+        # Fire a corresponding CAPI event for segmentation/optimization.
+        if action == "pre-buy":
+            send_event_async(
+                event_name="InitiateCheckout",
+                request=request,
+                email=email,
+                first_name=name.split()[0] if name.split() else None,
+                last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else None,
+                country=country,
+                content_name=sku,
+                content_category="fabiabox_hardware",
+                content_ids=[sku],
+                content_type="product",
+                num_items=quantity_int,
+            )
+            track_event(
+                request,
+                category="conversion",
+                action="initiate-checkout",
+                name=sku,
+                value=float(quantity_int),
+                action_name="FABIABox Shop",
+                uid=uid,
+            )
+        else:
+            send_event_async(
+                event_name="Lead",
+                request=request,
+                email=email,
+                first_name=name.split()[0] if name.split() else None,
+                last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else None,
+                country=country,
+                content_name=sku,
+                content_category="fabiabox_hardware",
+                content_ids=[sku],
+                content_type="product",
+                status="waiting-list",
+                custom_properties={"action": action, "quantity": quantity_int},
+            )
+            track_event(
+                request,
+                category="conversion",
+                action="lead",
+                name=sku,
+                value=float(quantity_int),
+                action_name="FABIABox Shop",
+                uid=uid,
+            )
 
     return jsonify(success=True), 201
 
