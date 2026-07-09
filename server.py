@@ -36,6 +36,7 @@ def _load_version() -> dict | None:
 # Files that Flask is allowed to serve directly. Everything else is proxied
 # through the catch-all route, but nginx blocks sensitive extensions first.
 SERVABLE = {
+    "favicon.ico",
     "index.html",
     "og-fabiashop.png",
 }
@@ -94,6 +95,8 @@ def _send_file(filename: str):
         response.headers["Content-Type"] = "text/html; charset=utf-8"
     elif filename.endswith(".png"):
         response.headers["Content-Type"] = "image/png"
+    elif filename.endswith(".ico"):
+        response.headers["Content-Type"] = "image/x-icon"
     return response
 
 
