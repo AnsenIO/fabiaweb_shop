@@ -36,6 +36,8 @@ DEPLOY_FILES=(
     "server.py"
     "meta_pixel.py"
     "matomo_tracker.py"
+    "generate_version.py"
+    "version.json"
     "requirements.txt"
     "start.sh"
     "og-fabiashop.png"
@@ -118,7 +120,10 @@ backup_preorders() {
 
 deploy_to_droplet() {
     log "Deploying to droplet ${DROPLET_IP}..."
-    
+
+    # Refresh version.json from the current commit before transferring
+    python3 "${SCRIPT_DIR}/generate_version.py" >/dev/null 2>&1 || true
+
     # Create data dir on droplet
     ssh_cmd "mkdir -p ${REMOTE_BASE}/data" >/dev/null 2>&1
     

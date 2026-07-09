@@ -85,7 +85,11 @@ class FabiaWebShopTests(unittest.TestCase):
     def test_health_ok(self):
         response = self.client.get("/health")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json(), {"status": "ok"})
+        data = response.get_json()
+        self.assertEqual(data["status"], "ok")
+        self.assertIn("version", data)
+        self.assertIsNotNone(data["version"])
+        self.assertIn("commit", data["version"])
 
     # ── Order submission ────────────────────────────────────────────────────
 

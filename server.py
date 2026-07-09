@@ -6,6 +6,7 @@ and _fbp/_fbc cookies). The event is fire-and-forget: page serving never blocks.
 """
 
 import csv
+import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +21,17 @@ app = Flask(__name__, static_folder=None)
 BASE = Path(__file__).resolve().parent
 DATA_DIR = BASE / "data"
 ORDERS_CSV = DATA_DIR / "orders.csv"
+VERSION_FILE = BASE / "version.json"
+
+
+def _load_version() -> dict | None:
+    """Return the deployed git version info if available."""
+    if not VERSION_FILE.exists():
+        return None
+    try:
+        return json.loads(VERSION_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return None
 
 # Files that Flask is allowed to serve directly. Everything else is proxied
 # through the catch-all route, but nginx blocks sensitive extensions first.
@@ -213,7 +225,7 @@ def submit_order():
 
 @app.route("/health")
 def health():
-    return jsonify(status="ok"), 200
+    return jsonify(status="ok", version=_load_version()), 200
 
 
 if __name__ == "__main__":

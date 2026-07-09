@@ -21,6 +21,9 @@ fi
 
 cd "${APP_DIR}"
 
+# Regenerate version.json from current git commit
+python3 generate_version.py >/dev/null 2>&1 || true
+
 exec gunicorn \
     --bind "127.0.0.1:${PORT}" \
     --workers 2 \
