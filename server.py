@@ -12,6 +12,7 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from matomo_tracker import track_event, track_page_view
 from meta_pixel import send_event_async
 
 app = Flask(__name__, static_folder=None)
@@ -59,13 +60,14 @@ def _client_ip() -> str:
 
 
 def _emit_page_view() -> None:
-    """Send async Meta Pixel PageView event before serving HTML."""
+    """Send async Meta Pixel + Matomo PageView events before serving HTML."""
     send_event_async(
         event_name="PageView",
         request=request,
         content_name="FABIABox Shop",
         content_category="shop",
     )
+    track_page_view(request, action_name="FABIABox Shop")
 
 
 def _send_file(filename: str):
@@ -173,6 +175,14 @@ def submit_order():
             content_type="product",
             num_items=quantity_int,
         )
+        track_event(
+            request,
+            category="conversion",
+            action="initiate-checkout",
+            name=sku,
+            value=float(quantity_int),
+            action_name="FABIABox Shop",
+        )
     else:
         send_event_async(
             event_name="Lead",
@@ -187,6 +197,14 @@ def submit_order():
             content_type="product",
             status="waiting-list",
             custom_properties={"action": action, "quantity": quantity_int},
+        )
+        track_event(
+            request,
+            category="conversion",
+            action="lead",
+            name=sku,
+            value=float(quantity_int),
+            action_name="FABIABox Shop",
         )
 
     print(f"[ORDER] {action} {quantity_int}x {sku} by {name} <{email}>")

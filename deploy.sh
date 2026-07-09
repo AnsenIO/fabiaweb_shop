@@ -35,6 +35,7 @@ DEPLOY_FILES=(
     "index.html"
     "server.py"
     "meta_pixel.py"
+    "matomo_tracker.py"
     "requirements.txt"
     "start.sh"
     "og-fabiashop.png"
