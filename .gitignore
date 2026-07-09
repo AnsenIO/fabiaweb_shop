@@ -25,3 +25,6 @@ storage/
 .fabia_data/
 .fabia_agents/
 version.json
+backup/*
+backups
+version.json
