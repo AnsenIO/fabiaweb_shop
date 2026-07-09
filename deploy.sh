@@ -159,8 +159,11 @@ deploy_to_droplet() {
         fi
     fi
     
-    # Restart gunicorn if server.py changed
-    ssh_cmd "cd ${REMOTE_BASE} && .venv/bin/gunicorn --reload --bind '127.0.0.1:8081' --workers 2 --timeout 30 --daemon --pid /tmp/gunicorn_fabiashop.pid server:app" >/dev/null 2>&1 || true
+    # Stop any existing gunicorn for this site
+    ssh_cmd "pkill -f 'gunicorn.*:8081' 2>/dev/null || true; sleep 1" >/dev/null 2>&1
+    # Start fresh gunicorn
+    ssh_cmd "cd ${REMOTE_BASE} && .venv/bin/gunicorn --bind '127.0.0.1:8081' --workers 2 --timeout 30 --daemon --pid /tmp/gunicorn_fabiashop.pid server:app" 2>&1 || true
+    sleep 2
     ok "Gunicorn restarted"
     
     # Verify
