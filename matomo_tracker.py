@@ -219,7 +219,15 @@ def _send_hit(endpoint: str, params: dict) -> None:
         data = {}
         if "token_auth" in params:
             data["token_auth"] = params.pop("token_auth")
-        requests.post(endpoint, params=params, data=data or None, timeout=5)
-    except Exception:
+        has_token = bool(data)
+        print(
+            f"[MATOMO] send has_token={has_token} cip={params.get('cip')} "
+            f"url={params.get('url')} action_name={params.get('action_name')} "
+            f"event={params.get('e_c')}/{params.get('e_a')}"
+        )
+        resp = requests.post(endpoint, params=params, data=data or None, timeout=5)
+        print(f"[MATOMO] response status={resp.status_code} len={len(resp.content)}")
+    except Exception as exc:  # pragma: no cover - keep tracking non-blocking
+        print(f"[MATOMO] send failed: {exc}")
         # Tracking failures must never break the site.
         pass

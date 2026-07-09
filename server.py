@@ -21,6 +21,19 @@ from meta_pixel import send_event_async
 app = Flask(__name__, static_folder=None)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=0, x_proto=1, x_host=1, x_prefix=0)
 
+
+@app.before_request
+def _log_request() -> None:
+    """Log every request with the recovered client IP for debugging."""
+    if request.path == "/health":
+        return
+    print(
+        f"[REQUEST] {request.method} {request.path} "
+        f"ip={_client_ip()} host={request.host} "
+        f"proto={request.headers.get('X-Forwarded-Proto', '')} "
+        f"ua={request.headers.get('User-Agent', '')[:80]}"
+    )
+
 BASE = Path(__file__).resolve().parent
 DATA_DIR = BASE / "data"
 ORDERS_CSV = DATA_DIR / "orders.csv"

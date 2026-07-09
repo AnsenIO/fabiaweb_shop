@@ -228,9 +228,14 @@ def send_page_view_async(
 
 
 def _send_event(endpoint: str, params: dict, payload: dict) -> None:
+    event_name = payload.get("data", [{}])[0].get("event_name", "unknown")
+    ip = payload.get("data", [{}])[0].get("user_data", {}).get("client_ip_address", "")
     try:
+        print(f"[PIXEL] send event={event_name} ip={ip}")
         response = requests.post(endpoint, params=params, json=payload, timeout=5)
+        print(f"[PIXEL] response event={event_name} status={response.status_code}")
         response.raise_for_status()
-    except Exception:
+    except Exception as exc:
+        print(f"[PIXEL] send failed event={event_name}: {exc}")
         # CAPI failures must not break the shop.
         pass
