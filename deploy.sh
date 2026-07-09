@@ -41,7 +41,12 @@ DEPLOY_FILES=(
     "requirements.txt"
     "start.sh"
     "og-fabiashop.png"
+    "og-fabiabox.png"
+    "favicon.ico"
     "CONTEXT.md"
+    "README.md"
+    "fetch-orders.sh"
+    "test.py"
 )
 
 # ── Helpers ────────────────────────────────────────────────────────────────────────
