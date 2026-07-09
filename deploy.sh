@@ -149,7 +149,7 @@ deploy_to_droplet() {
         else
             local local_hash remote_hash
             local_hash=$(md5sum "$SCRIPT_DIR/nginx.conf" | cut -d' ' -f1)
-            remote_hash=$(ssh_cmd "md5sum /etc/nginx/sites-enabled/fabiaweb_shop 2>/dev/null | cut -d' ' -f1" || echo "none")
+            remote_hash=$(ssh_cmd "md5sum /etc/nginx/sites-available/fabiaweb_shop 2>/dev/null | cut -d' ' -f1" || echo "none")
             if [ "$local_hash" != "$remote_hash" ]; then
                 log "Updating nginx config..."
                 base64 "$SCRIPT_DIR/nginx.conf" | ssh -i "$SSH_KEY" \
@@ -157,7 +157,7 @@ deploy_to_droplet() {
                     "root@${DROPLET_IP}" \
                     "python3 -c \"import base64,sys; data=base64.b64decode(sys.stdin.buffer.read()); open('/etc/nginx/sites-enabled/fabiaweb_shop','wb').write(data)\""
                 ssh_cmd "nginx -t 2>&1 && nginx -s reload" >/dev/null 2>&1
-                ok "Nginx config updated and reloaded"
+                ok "Nginx config uploaded to sites-available - ready to relink and config reload if needed"
             else
                 ok "Nginx config up to date"
             fi
