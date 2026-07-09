@@ -14,6 +14,7 @@ Environment variables:
 """
 
 import hashlib
+import ipaddress
 import os
 import random
 import time
@@ -30,6 +31,48 @@ _executor = ThreadPoolExecutor(max_workers=2)
 def _hashed_uid(email: str) -> str:
     """Return a stable, pseudonymised user ID from an email address."""
     return hashlib.sha256(email.lower().strip().encode("utf-8")).hexdigest()
+
+
+_DEFAULT_EXCLUDED_NETWORKS = (
+    "127.0.0.0/8",
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16",
+    "::1/128",
+    "fc00::/7",
+)
+
+
+def _excluded_networks() -> list:
+    """Return IP networks that should not be tracked.
+
+    Defaults to common loopback/private ranges. Add public IPs/CIDRs via
+    the MATOMO_EXCLUDE_IPS environment variable (comma-separated).
+    """
+    networks = [
+        ipaddress.ip_network(cidr, strict=False)
+        for cidr in _DEFAULT_EXCLUDED_NETWORKS
+    ]
+    raw = os.environ.get("MATOMO_EXCLUDE_IPS", "")
+    for item in raw.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(item, strict=False))
+        except ValueError:
+            # Ignore malformed entries rather than breaking tracking.
+            continue
+    return networks
+
+
+def _is_excluded_ip(ip: str) -> bool:
+    """Return True if the given IP is in an excluded network."""
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return any(addr in net for net in _excluded_networks())
 
 
 def _tracker_url() -> Optional[str]:
@@ -114,7 +157,7 @@ def track_page_view(
 ) -> None:
     """Fire an async Matomo PageView hit. Does nothing if MATOMO_URL is unset."""
     endpoint = _tracker_url()
-    if not endpoint:
+    if not endpoint or _is_excluded_ip(_client_ip(request)):
         return
 
     params = _base_params(request, url=url, uid=uid)
@@ -136,7 +179,7 @@ def track_event(
 ) -> None:
     """Fire an async Matomo event hit."""
     endpoint = _tracker_url()
-    if not endpoint:
+    if not endpoint or _is_excluded_ip(_client_ip(request)):
         return
 
     params = _base_params(request, url=url, uid=uid)
