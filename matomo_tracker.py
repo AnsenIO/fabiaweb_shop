@@ -214,8 +214,12 @@ def track_download(
 
 
 def _send_hit(endpoint: str, params: dict) -> None:
+    """Send the tracking hit. Token auth is sent via POST for Matomo 5 compatibility."""
     try:
-        requests.get(endpoint, params=params, timeout=5)
+        data = {}
+        if "token_auth" in params:
+            data["token_auth"] = params.pop("token_auth")
+        requests.post(endpoint, params=params, data=data or None, timeout=5)
     except Exception:
         # Tracking failures must never break the site.
         pass
