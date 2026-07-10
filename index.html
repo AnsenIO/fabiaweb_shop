@@ -18,6 +18,8 @@
         .gold { color: #b8860b; }
         .bg-gold { background-color: #b8860b; }
         .border-gold { border-color: #b8860b; }
+        .step-node { transition: all 0.3s ease; }
+        .step-node:hover { transform: translateY(-5px); border-color: #b8860b; }
     </style>
 </head>
 <body class="antialiased">
@@ -30,7 +32,7 @@
                 <span class="font-bold text-lg tracking-tight">FABIABox <span class="text-stone-500 font-normal">Shop</span></span>
             </a>
             <div class="flex items-center gap-4">
-                <a href="https://fabiabox.com/" class="hidden md:inline text-sm font-semibold text-stone-600 hover:text-amber-700 no-underline">Investor</a>
+                <a href="https://fabiabox.com/investor.html" class="hidden md:inline text-sm font-semibold text-stone-600 hover:text-amber-700 no-underline">Investor</a>
                 <a href="/#order" class="bg-stone-900 text-white px-5 py-2.5 rounded-full font-bold text-xs tracking-wide hover:bg-amber-600 transition no-underline">PRE-ORDER NOW</a>
             </div>
         </div>
@@ -46,6 +48,109 @@
             <div class="flex justify-center gap-4">
                 <a href="/#products" class="bg-stone-900 text-white px-8 py-4 rounded-full font-bold hover:bg-amber-600 transition no-underline">View products</a>
                 <a href="https://fabiabox.com/research.html" class="bg-white border border-stone-300 text-stone-900 px-8 py-4 rounded-full font-bold hover:border-amber-600 transition no-underline">Read the research</a>
+            </div>
+        </section>
+
+        <!-- Section: How it works -->
+        <section id="how-it-works" class="bg-stone-900 text-white py-20">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="text-center mb-14">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">How FABIABox ships your company</h2>
+                    <p class="text-stone-400 max-w-2xl mx-auto">From idea to launched product — locally, under your control.</p>
+                </div>
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="step-node w-full md:w-72 p-6 rounded-2xl bg-stone-800 border border-stone-700 text-center">
+                        <div class="text-4xl mb-4">📄</div>
+                        <h4 class="font-bold mb-2">1. Share your idea</h4>
+                        <p class="text-xs text-stone-400">Upload documents, describe your product, and set your goals.</p>
+                    </div>
+                    <div class="hidden md:block text-stone-600 text-2xl">❯❯❯</div>
+                    <div class="step-node w-full md:w-72 p-6 rounded-2xl bg-amber-900/20 border border-amber-700/50 text-center">
+                        <div class="text-4xl mb-4">🧠</div>
+                        <h4 class="font-bold mb-2">2. Approve the plan</h4>
+                        <p class="text-xs text-stone-400">Fabia designs your MVP, brand, and go-to-market stack.</p>
+                    </div>
+                    <div class="hidden md:block text-stone-600 text-2xl">❯❯❯</div>
+                    <div class="step-node w-full md:w-72 p-6 rounded-2xl bg-white text-stone-900 text-center">
+                        <div class="text-4xl mb-4">🚀</div>
+                        <h4 class="font-bold mb-2">3. Ship</h4>
+                        <p class="text-xs text-stone-500">Get a live product running on your FABIABox — not rented from the cloud.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Use cases -->
+        <section id="use-cases" class="max-w-6xl mx-auto px-6 py-20">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">Built for founders who refuse to rent their company</h2>
+                    <p class="text-stone-600 mb-6 leading-relaxed">
+                        Cloud AI forces you to hand over data, models, and control. FABIABox keeps agents, models, and execution on hardware you own.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1 text-amber-600 font-bold">✓</div>
+                            <div>
+                                <p class="font-bold">No technical co-founder needed</p>
+                                <p class="text-sm text-stone-500">Fabia builds the MVP, brand, and go-to-market stack from your documents.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1 text-amber-600 font-bold">✓</div>
+                            <div>
+                                <p class="font-bold">Own your AI stack</p>
+                                <p class="text-sm text-stone-500">Run models locally on DGX, Thor, or AMD silicon. No cloud lock-in.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1 text-amber-600 font-bold">✓</div>
+                            <div>
+                                <p class="font-bold">Built for EU compliance</p>
+                                <p class="text-sm text-stone-500">Designed around data sovereignty, EU AI Act transparency, and eIDAS 2.0 signatures.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm">
+                    <h3 class="text-xl font-bold mb-4">Use cases</h3>
+                    <ul class="space-y-3 text-stone-600 text-sm">
+                        <li class="flex gap-2"><span class="text-amber-600">•</span><span><strong>Non-technical founders</strong> launching a SaaS, marketplace, or service business.</span></li>
+                        <li class="flex gap-2"><span class="text-amber-600">•</span><span><strong>Consultants & agencies</strong> productizing expertise into a sellable tool.</span></li>
+                        <li class="flex gap-2"><span class="text-amber-600">•</span><span><strong>Regulated industries</strong> that cannot send customer data to cloud AI.</span></li>
+                        <li class="flex gap-2"><span class="text-amber-600">•</span><span><strong>Teams without a dev team</strong> that need to ship an MVP in days, not months.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Current status -->
+        <section id="status" class="bg-stone-100 py-20 border-y border-stone-200">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold mb-4">Current status</h2>
+                    <p class="text-stone-600">Prototype ready. Pre-orders open. First units targeted for Q3 2026.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 text-center">
+                        <div class="text-3xl mb-3">🛠️</div>
+                        <h4 class="font-bold mb-2">Prototype Ready</h4>
+                        <p class="text-sm text-stone-500">DGX Foundry, Thor/395 Foundry, and Cloud Node tiers defined and tested.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 text-center">
+                        <div class="text-3xl mb-3">📦</div>
+                        <h4 class="font-bold mb-2">Shipping Q3 2026</h4>
+                        <p class="text-sm text-stone-500">Pre-buyers get priority fulfillment and direct progress updates.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 text-center">
+                        <div class="text-3xl mb-3">🇪🇺</div>
+                        <h4 class="font-bold mb-2">EU AI Act Aligned</h4>
+                        <p class="text-sm text-stone-500">Local execution, data sovereignty, and eIDAS-ready agent signatures.</p>
+                    </div>
+                </div>
+                <div class="mt-10 text-center">
+                    <a href="https://fabiabox.com/investor.html" class="text-amber-700 font-semibold hover:text-amber-900 underline">Read the full investor deck →</a>
+                </div>
             </div>
         </section>
 
