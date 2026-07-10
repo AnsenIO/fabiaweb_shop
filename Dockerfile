@@ -11,10 +11,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir "gunicorn>=23,<24" "flask>=3.1,<4" "requests>=2.32"
 
-# Install app deps (requirements.txt may have extras)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Copy app code (data/ is bind-mounted at runtime)
 COPY . .
 

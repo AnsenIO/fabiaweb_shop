@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+
+# IDE
+.vscode
+.idea
+
+# Deployment artifacts
+backups/
+web_data/
+shop_data/
+archive/
+*.csv
+*.pdf
+*.png
+*.ico
+*.html
+*.sh
+*.md
+*.txt
+*.json
+*.yaml
+*.yml
+*.toml
+*.lock
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+
+# Nginx
+nginx.conf
+
+# Deploy scripts
+deploy.sh
+generate_version.py
+
+# Test
+test.py
+
+# Env
+.env
