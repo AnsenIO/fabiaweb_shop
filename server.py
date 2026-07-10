@@ -276,9 +276,9 @@ def submit_order():
 
 @app.route("/health")
 def health():
-    return jsonify(status="ok", version=_load_version()), 200
-
-
+    response = jsonify(status="ok", version=_load_version())
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response, 200
 if __name__ == "__main__":
     _ensure_csv()
     port = int(os.environ.get("PORT", "8080"))
