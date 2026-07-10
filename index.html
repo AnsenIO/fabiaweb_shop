@@ -339,7 +339,10 @@
                 if (ok) {
                     status.className = 'text-center text-sm font-semibold text-green-700';
                     status.textContent = '\u2714  Thank you! We will contact you within 24 hours.';
+                    status.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     form.reset();
+                    btn.disabled = true;
+                    btn.textContent = 'Sent \u2714';
                 } else {
                     throw new Error(data.error || 'Submission failed');
                 }
@@ -347,10 +350,13 @@
             .catch(err => {
                 status.className = 'text-center text-sm font-semibold text-red-700';
                 status.textContent = '\u2717  ' + err.message;
+                status.scrollIntoView({ behavior: 'smooth', block: 'center' });
             })
             .finally(() => {
-                btn.disabled = false;
-                btn.textContent = 'Submit pre-order';
+                if (!btn.disabled) {
+                    btn.disabled = false;
+                    btn.textContent = 'Submit pre-order';
+                }
             });
         });
     </script>
