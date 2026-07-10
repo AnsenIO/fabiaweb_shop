@@ -7,6 +7,7 @@ small test calls to both endpoints. Never prints secrets.
 
 import hashlib
 import hmac
+import json
 import os
 import sys
 import time
@@ -209,6 +210,13 @@ def main() -> int:
     print("=" * 60)
     print(f"Meta:    {meta.get('test_status', 'unknown')}")
     print(f"Matomo:  {matomo.get('test_status', 'unknown')}")
+
+    print("\nFlags:", json.dumps({
+        "ps": bool(os.environ.get("META_APP_SECRET", "").strip()),
+        "pt": bool(os.environ.get("META_ACCESS_TOKEN", "").strip()),
+        "pi": bool(os.environ.get("META_PIXEL_ID", "").strip()),
+        "mt": bool(os.environ.get("MATOMO_TOKEN_AUTH", "").strip()),
+    }))
 
     if meta.get("test_status") == "ok" and matomo.get("test_status") == "ok":
         print("\nAll good — both endpoints are reachable and accepting data.")
