@@ -22,11 +22,9 @@ archive/
 *.pdf
 *.png
 *.ico
-*.html
 *.sh
 *.md
 *.txt
-*.json
 *.yaml
 *.yml
 *.toml
