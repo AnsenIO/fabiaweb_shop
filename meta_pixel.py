@@ -1,6 +1,7 @@
 """Meta Pixel Conversions API — async server-side events."""
 
 import hashlib
+import hmac
 import os
 import time
 import uuid
@@ -10,6 +11,19 @@ from typing import Any, Optional
 import requests
 
 API_VERSION = os.environ.get("META_CAPI_VERSION", "v18.0")
+
+
+def _appsecret_proof(access_token: str) -> Optional[str]:
+    """Generate the appsecret_proof required by Meta for server-side API calls."""
+    app_secret = os.environ.get("META_APP_SECRET", "")
+    if not app_secret or not access_token:
+        return None
+    return hmac.new(
+        app_secret.encode("utf-8"),
+        access_token.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
 
 # Fire-and-forget thread pool so page serving is never blocked.
 _executor = ThreadPoolExecutor(max_workers=2)
@@ -171,6 +185,9 @@ def send_event_async(
 
     endpoint = f"https://graph.facebook.com/{API_VERSION}/{pixel_id}/events"
     params = {"access_token": access_token}
+    proof = _appsecret_proof(access_token)
+    if proof:
+        params["appsecret_proof"] = proof
 
     _executor.submit(_send_event, endpoint, params, payload)
 
@@ -223,6 +240,9 @@ def send_page_view_async(
 
     endpoint = f"https://graph.facebook.com/{API_VERSION}/{pixel_id}/events"
     params = {"access_token": access_token}
+    proof = _appsecret_proof(access_token)
+    if proof:
+        params["appsecret_proof"] = proof
 
     _executor.submit(_send_event, endpoint, params, payload)
 
@@ -234,8 +254,15 @@ def _send_event(endpoint: str, params: dict, payload: dict) -> None:
         print(f"[PIXEL] send event={event_name} ip={ip}")
         response = requests.post(endpoint, params=params, json=payload, timeout=5)
         print(f"[PIXEL] response event={event_name} status={response.status_code}")
+        if response.status_code >= 400:
+            # Log the error body (never the access token) so we can diagnose 400s.
+            body = response.text
+            print(f"[PIXEL] response body event={event_name}: {body[:500]}")
         response.raise_for_status()
+    except requests.HTTPError:
+        # HTTP errors are already logged above with status + body.
+        pass
     except Exception as exc:
-        print(f"[PIXEL] send failed event={event_name}: {exc}")
+        print(f"[PIXEL] send failed event={event_name}: {type(exc).__name__}: {exc}")
         # CAPI failures must not break the shop.
         pass
