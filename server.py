@@ -75,7 +75,7 @@ def _ensure_csv() -> None:
     if not ORDERS_CSV.exists():
         with ORDERS_CSV.open("w", newline="", encoding="utf-8") as fh:
             csv.writer(fh).writerow([
-                "timestamp", "name", "email", "company", "country",
+                "timestamp", "ip", "name", "email", "company", "country",
                 "sku", "quantity", "action", "message", "status",
             ])
 
@@ -203,9 +203,11 @@ def submit_order():
         return jsonify(success=False, error="Quantity must be a positive integer"), 400
 
     _ensure_csv()
+    client_ip = _client_ip()
     with ORDERS_CSV.open("a", newline="", encoding="utf-8") as fh:
         csv.writer(fh).writerow([
             datetime.now(timezone.utc).isoformat(),
+            client_ip,
             name,
             email,
             company,
